@@ -1,131 +1,91 @@
-import React, { Component } from 'react'
-
-
-export default class RegisterBox extends Component {
+import React, { PureComponent } from 'react'
+import ReactDOM from 'react-dom'
+export default class RegisterBox extends PureComponent {
     constructor(props) {
         super(props)
         this.state = {
-            countryPhoneCode: '+86',
-            iconType: {
-                content: '',
-                top: '5px'
-            },
-            countrySelectBoxIsShowing: false,
-            phoneNumber: null,
-            phoneIsRight: false,
-            phoneReg: /^\+861206710179$/,
-            phoneCountryData: [
+            userData: [
                 {
-                    country: '中国',
-                    code: 86
-                },
-                {
-                    country: '中国香港',
-                    code: 852
-                },
-                {
-                    country: '中国澳门',
-                    code: 853
-                },
-                {
-                    country: '中国台湾',
-                    code: 886
-                },
-            ]
+                    username: '1206710179',
+                    password: 'liuming2333'
+                }
+            ],
+            usernameIsEmpty: false,
+            passwordIsEmpty: false,
+            username: '',
+            password: '',
+            isValuable: true,
+            errClass: 'noError'
         }
     }
+
     render() {
         return (
-            <div className={this.props.className + ' ' + 'registerBoxBg'} onClick={this.props.onClick}>
+            <div className={this.props.className + ' ' + 'registerBoxBg'} onClick={this.props.onClick} >
                 <div className={this.props.BoxClass + ' registerBox'} onClick={(e) => { e.stopPropagation() }}
-                    style={{ position: 'relative' }}>
-                    <h1 className='registerTitle'>欢迎使用力扣</h1>
+                >
+                    <div className={this.state.errClass}>  用户名或密码有误</div>
+                    <h1 className='registerTitle'>账号密码登录</h1>
 
-                    <div className='registerInput' >
-                        <span onClick={this.switchCounrySelectBox} className='registerSelectCountry'>
-                            {this.state.countryPhoneCode}
-                            <i style={{ top: this.state.iconType.top }}>{this.state.iconType.content}</i>
-                        </span>
-                        <input ref='phone' type='text' className='registerPhone' placeholder='输入手机号'
-                            onChange={this.getPhone}></input>
-                    </div>
-
-                    <div className='registerInput' >
-                        <input type='text' placeholder='验证码' className='registerCode' id='registerCode'></input>
-                        <label htmlFor='registerCode' className={
-                            this.state.phoneIsRight ? 'registerSendCodeuse' : 'registerSendCodeDisable'
-                        } onClick={this.getCode} ref='CodeSecond'>获取验证码</label>
-                    </div>
-
-                    <ul style={{
-                        display: this.state.countrySelectBoxIsShowing ? 'block' : 'none'
-                    }} className='countrySelectBox'>
-                        {this.state.phoneCountryData.map((value,index) => {
-                            return (
-                                <li onClick={this.selectCountry} key={index}>{`${value.country}(+${value.code})`}</li>
-                            )
-                        })}
-                    </ul>
+                    <input className='registerInput' type='text' placeholder='手机号/邮箱' onChange={this.getUsername}></input>
+                    <div className='dataNone' style={{
+                        display: this.state.usernameIsEmpty
+                            ?
+                            'block'
+                            :
+                            'none'
+                    }}>请输入手机号或邮箱</div>
+                    <input className='registerInput' type='password' placeholder='输入密码' onChange={this.getPassword}></input>
+                    <div className='dataNone' style={{
+                        display: this.state.passwordIsEmpty
+                            ?
+                            'block'
+                            :
+                            'none'
+                    }}>请输入密码</div>
+                    <button className='registerBtn' onClick={this.postData}>登录</button>
                 </div>
             </div>
         )
     }
-    switchCounrySelectBox = () => {
-        this.state.countrySelectBoxIsShowing
-            ?
-            this.setState({
-                iconType: {
-                    content: '',
-                    top: '5px'
-                },
-                countrySelectBoxIsShowing: false
-            })
-            :
-            this.setState({
-                iconType: {
-                    content: '',
-                    top: '0px'
-                },
-                countrySelectBoxIsShowing: true
-            })
-
-    }
-    getPhone = () => {
-
+    postData = () => {
         this.setState({
-            phoneNumber: this.state.countryPhoneCode + this.refs.phone.value
-        }, this.testPhone)
-    }
-    testPhone = () => {
-        this.setState({
-            phoneIsRight: this.state.phoneReg.test(this.state.phoneNumber)
-        })
-    }
-    getCode = () => {
-        this.setState({
-            phoneIsRight: false
-        })
-        let second = 60;
-        this.refs.CodeSecond.innerHTML = `${second} 秒后可重发`
-        let timer = setInterval(() => {
-            second--;
-            this.refs.CodeSecond.innerHTML = `${second} 秒后可重发`
-            if (second === 0) {
-                clearInterval(timer)
+            usernameIsEmpty: this.state.username === '',
+            passwordIsEmpty: this.state.password === ''
+        }, () => {
+            if (!this.state.usernameIsEmpty && !this.state.passwordIsEmpty) {
                 this.setState({
-                    phoneIsRight: this.state.phoneReg.test(this.state.phoneNumber)
+                    isValuable: this.state.userData.some(value => {
+                        return value.password === this.state.password && value.username === this.state.username
+                    })
+                }, () => {
+                    if (!this.state.isValuable)
+                        this.dataError()
                 })
-                this.refs.CodeSecond.innerHTML = '获取验证码'
             }
-        }, 1000)
-    }
-    selectCountry=(e)=>{
-        this.setState({
-            countryPhoneCode:`+${e.target.innerHTML.match(/[0-9]+/g)}`
-        },()=>{
-            this.getPhone()
         })
-        this.switchCounrySelectBox()
-        
+    }
+    getUsername = (e) => {
+        this.setState({
+            username: e.target.value
+        })
+    }
+    getPassword = (e) => {
+        this.setState({
+            password: e.target.value
+        })
+    }
+    dataError = () => {
+
+        this.setState({
+            errClass: 'errorInfo'
+        }, () => {
+            setTimeout(() => {
+                this.setState({
+                    errClass: 'noError'
+                })
+            }, 2000)
+        })
+
     }
 }

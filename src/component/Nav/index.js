@@ -20,7 +20,7 @@ export default class Nav extends Component {
                     &ensp;
                     <a onClick={this.registerShow}>登录</a>
                 </div>
-                <RegisterBox className={this.state.BoxStateBg} onClick={this.registerHide} BoxClass={this.state.BoxClass}/>
+                <RegisterBox className={this.state.BoxStateBg} onClick={this.registerHide} BoxClass={this.state.BoxClass}></RegisterBox>
             </div>
         )
     }
